@@ -1,4 +1,4 @@
-export const W=8,H=16;
+export const W=8,H=13;
 export function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 export const empty=()=>Array.from({length:H},()=>Array(W).fill(null));
 export function largestOnes(g){let seen=new Set(),best=[];for(let y=0;y<H;y++)for(let x=0;x<W;x++){let k=y*W+x;if(g[y][x]?.n!==1||seen.has(k))continue;let q=[k],cells=[];seen.add(k);while(q.length){let v=q.pop(),a=v%W,b=Math.floor(v/W);cells.push(v);for(let [c,d]of [[a-1,b],[a+1,b],[a,b-1],[a,b+1]])if(c>=0&&c<W&&d>=0&&d<H&&g[d][c]?.n===1&&!seen.has(d*W+c)){seen.add(d*W+c);q.push(d*W+c)}}if(cells.length>best.length)best=cells}return best}
