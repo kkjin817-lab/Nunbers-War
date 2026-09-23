@@ -33,3 +33,5 @@ main .titlebar>div:first-child,.match-time,.clash,.hint,.legend,.playerlabel,.bo
  .cpu h2{font-size:12px}
 }
 @media(max-width:650px) and (max-height:680px){.arena{grid-template-rows:88px 10px minmax(0,1fr)}.cpu{grid-template-columns:minmax(0,1fr) 80px minmax(0,1fr)}.cpu .board-shell{width:80px}.center{height:10px}}
+
+.cpu{position:relative}#risk{position:absolute;right:4px;top:25%;height:50%;width:6px;background:#dde6d7;border-radius:5px;overflow:hidden}#riskFill{position:absolute;bottom:0;left:0;width:100%;background:#86b393;transition:height .2s}#risk.danger #riskFill{background:#d4857c}.shuffle-info{text-align:center;color:#64816d;font-size:14px;line-height:1.7}@media(max-width:650px){.brand{font-size:15px;letter-spacing:.3px}.match-tools{gap:4px}.match-tools button{width:29px;height:29px}.cpu #risk{right:0;top:12%;height:76%;width:7px}.cpu .gauge-title,.cpu .gauge{margin-right:12px}}
