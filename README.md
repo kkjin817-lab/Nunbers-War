@@ -1,1 +1,53 @@
-# Nunbers-War
+# NUMBERS WAR — 모바일 프로토타입
+
+컴퓨터 대전용 웹 게임입니다. 사람끼리 온라인 대전하는 기능은 포함하지 않습니다.
+별도 설치·빌드·API 키 없이 GitHub Pages에서 실행할 수 있습니다.
+
+## GitHub에 올려 실행하기
+
+1. ZIP 압축을 풉니다. ZIP 파일 자체를 업로드하지 마세요.
+2. GitHub에 새 저장소를 만듭니다. 무료 개인 계정이라면 Public 저장소로 테스트할 수 있습니다. Public은 코드가 공개됩니다.
+3. 저장소의 Add file → Upload files에서 압축을 푼 파일들을 올리고 Commit changes를 누릅니다.
+4. index.html, tiles.css, tiles-app.mjs, tiles-engine.mjs가 저장소 최상위에 나란히 있어야 합니다. 상위 폴더째 넣지 마세요.
+5. Settings → Pages → Build and deployment에서 Source를 Deploy from a branch로 선택합니다.
+6. Branch는 main, 폴더는 / (root)를 선택하고 Save를 누릅니다.
+7. 게시가 완료되면 Pages 화면에 표시되는 주소를 스마트폰 브라우저에서 엽니다. 갱신이 안 되면 새로고침하세요.
+
+공식 안내: https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
+
+## 실행과 조작
+
+첫 화면에서 규칙을 읽고 쉬움·보통·어려움을 선택한 뒤 게임을 시작합니다.
+모바일: 내 보드의 열을 누른 채 좌우로 움직여 착지 위치를 확인하고 손을 떼면 낙하합니다. 보드 밖에서 손을 떼면 취소됩니다. 공격 보내기 버튼으로 한 발씩 발사합니다.
+PC: 방향키 이동, 아래 방향키 빠른 낙하, Space 즉시 낙하, 0 공격. 마우스로 열을 클릭하는 방식도 지원합니다.
+
+## 주요 규칙
+
+- 2~9: 같은 숫자를 상하좌우로 숫자 이상 연결하면 제거, 제거 1개당 공격 스택 1칸.
+- 연속 숫자 3개 이상을 가로·세로 직선에 배치하면 스트레이트. 역순도 인정.
+- 일반 스트레이트는 주변 한 겹, 1 포함 스트레이트는 두 겹 제거.
+- 상하좌우로 연결된 1이 10개 이상이면 내 보드의 모든 고정 타일 제거. 기존 스택 유지, 추가 스택 없음.
+- 공격은 3초 예고. 예고 칸에 내 타일 고정 또는 맞발사로 방어.
+- 상대 생성 위치가 막히면 승리.
+
+## 로컬 실행 (선택)
+
+JavaScript 모듈을 사용하므로 index.html을 더블클릭하는 대신 웹 서버로 실행하세요.
+Python이 설치되어 있다면 이 폴더에서:
+
+```sh
+python -m http.server 8000
+```
+
+브라우저에서 http://localhost:8000 접속.
+폰트는 Google Fonts를 사용하며 연결할 수 없으면 시스템 기본 글꼴로 표시됩니다.
+
+## 파일
+
+- index.html: 규칙 안내 및 게임 화면
+- tiles.css: 파스텔 디자인·모바일 레이아웃
+- tiles-app.mjs: 화면·터치·키보드·공격 연출
+- tiles-engine.mjs: 게임 규칙·컴퓨터 대전
+- .nojekyll: 정적 파일 게시용
+
+내보내기: 2026-09-23, 모바일 버전 04. 원본 게임의 동작을 변경하지 않은 배포용 복사본입니다.
