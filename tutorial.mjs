@@ -1,0 +1,29 @@
+import {empty,resolve} from './tiles-engine.mjs';
+import {audio} from './sound.mjs';
+const $=id=>document.getElementById(id),key='numbers-war-tutorial-v1';
+let step=0,part=0,done=false,grid=empty(),target=3,number=2,active=false,handles=[],pointer=null,column=null;
+const titles=['타일 놓기','같은 숫자 모으기','공격 스택으로 발사','스트레이트 만들기','배치로 방어하기','맞발사로 방어하기','1의 특별한 폭발','이기려면 어떻게 할까요?'];
+const hints=['반짝이는 열을 눌렀다가 손을 떼세요.','2는 두 개가 붙으면 사라져요. 옆에 놓아보세요.','공격 스택 1칸으로 공격 타일 1개를 보낼 수 있어요.','3–4 다음에 5! 한 줄로 연속 숫자 3개를 놓으세요.','흐린 공격 타일이 생길 자리에 내 타일을 놓으세요.','공격이 도착하기 전에 맞발사하면 서로 사라져요.','1–2–3 스트레이트는 주변 두 겹까지 터져요.','상대의 타일 생성 위치가 막히면 승리해요.'];
+function later(fn,ms){handles.push(setTimeout(()=>{if(active)fn()},ms))}function cleanup(){handles.forEach(clearTimeout);handles=[];pointer=null;column=null}
+function status(t){$('tMessage').textContent=t}
+function draw(){let board=$('tBoard');board.replaceChildren();for(let y=7;y<13;y++)for(let x=0;x<8;x++){let el=document.createElement('div'),t=grid[y][x];el.className='t-cell'+(t?' t-n'+t.n:'');if(t)el.textContent=t.n;if(!done&&x===target&&![2,5,7].includes(step))el.classList.add('t-selected');if(step===4&&!done&&y===12&&x===target){el.textContent='7';el.classList.add('t-warning')}board.append(el)}$('tHeld').textContent=number;$('tHeld').className='t-held t-n'+number;$('tHeld').hidden=[2,5,7].includes(step)||done;}
+function setup(){cleanup();done=false;grid=empty();target=3;number=2;$('tTitle').textContent=titles[step];$('tHint').textContent=hints[step];$('tProgress').textContent=(step+1)+' / 8';$('tNext').disabled=true;$('tPrev').disabled=step===0&&part===0;$('tNext').textContent=step===7?'난이도 선택 →':'다음 →';$('tFire').hidden=![2,5,7].includes(step);$('tFire').disabled=false;$('tFire').textContent=step===7?'승리 장면 보기':'↑ 공격 보내기';$('tMeter').textContent=[2,5].includes(step)?'공격 스택 2/12':'공격 스택 0/12';$('tOpponent').textContent='상대방(Ai)';$('tFlight').textContent='';$('tFlight').className='';$('tCount').textContent='';status('천천히 해보세요. 연습 중에는 패배하지 않아요.');
+if(step===1)grid[12][2]={n:2};
+if(step===3){grid[12][2]={n:3};grid[12][3]={n:4};grid[12][5]={n:9};grid[11][2]={n:8};number=5;target=4}
+if(step===4){number=6;$('tCount').textContent=part?'3.0초':'시간 멈춤';if(part)countdown(3)}
+if(step===5){$('tCount').textContent='3.0초';countdown(3)}
+if(step===6){if(part===0){grid[12][2]={n:1};grid[12][3]={n:2};grid[12][5]={n:8};grid[11][5]={n:9};grid[10][3]={n:7};number=3;target=4}else{for(let x=0;x<8;x++)grid[12][x]={n:1};grid[11][0]={n:1};number=1;target=1;$('tHint').textContent='붙어 있는 1이 아홉 개! 마지막 1을 연결해 전체 폭발을 만드세요.'}}
+if(step===7){$('tOpponent').textContent='상대 생성 위치 ↓';for(let y=7;y<13;y++)grid[y][3]={n:y%2?8:9};$('tHint').textContent='이 보드는 상대 보드의 예시예요. 맨 위 생성 위치가 막혔어요.'}
+draw()}
+function countdown(seconds){let end=performance.now()+seconds*1000;function tick(){if(done)return;let remain=(end-performance.now())/1000;if(remain<=0){$('tCount').textContent='다시 연습';status('괜찮아요! 한 번 더 해봐요.');later(setup,1000);return}$('tCount').textContent=remain.toFixed(1)+'초';later(tick,70)}tick()}
+function success(text,type='clear'){done=true;cleanup();status(text);$('tNext').disabled=false;$('tFire').disabled=true;$('tCount').textContent='성공!';audio.play(type);draw()}
+function place(x){if(done||!active||[2,5,7].includes(step))return;if(x!==target){status('반짝이는 열에 놓아볼까요?');audio.play('place');return}let y=12;while(y>=7&&grid[y][x])y--;grid[y][x]={n:number};draw();audio.play('place');done=true;cleanup();later(()=>{let r=resolve(grid);if(step===0)success('잘했어요! 손을 뗀 열에 타일이 놓여요.','place');else if(step===1){$('tMeter').textContent='공격 스택 +'+r.gain;success('2개 제거 → 스택 2칸! 3은 세 개, 4는 네 개를 붙여요.')}else if(step===3)success('스트레이트! 주변 한 겹도 제거돼요. 세로·역순도 가능해요.');else if(step===4)success(part?'3초 안에 방어 성공!':'배치 방어 성공! 다음은 실제 3초로 해봐요.','block');else if(step===6)success(part?'1 열 개 연결! 내 고정 타일이 모두 사라져요. 추가 스택은 없어요.':'1 스트레이트! 주변 두 겹까지 사라졌어요.',part?'mega':'expanded')},400)}
+$('tBoard').addEventListener('pointerdown',e=>{if(!active||done||pointer!==null)return;audio.unlock();pointer=e.pointerId;$('tBoard').setPointerCapture(pointer);column=Math.min(7,Math.max(0,Math.floor((e.clientX-$('tBoard').getBoundingClientRect().left)/$('tBoard').clientWidth*8)));e.preventDefault()});
+$('tBoard').addEventListener('pointermove',e=>{if(e.pointerId===pointer)column=Math.min(7,Math.max(0,Math.floor((e.clientX-$('tBoard').getBoundingClientRect().left)/$('tBoard').clientWidth*8)))});
+$('tBoard').addEventListener('pointerup',e=>{if(pointer!==e.pointerId)return;let r=$('tBoard').getBoundingClientRect(),x=column;pointer=null;if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom)place(x)});
+$('tBoard').addEventListener('pointercancel',()=>{pointer=null});
+$('tFire').onclick=()=>{if(done)return;audio.unlock();if(step===7){$('tOpponent').textContent='상대 생성 위치 막힘';success('승리! 내 생성 위치가 막히지 않도록 조심하세요.','win');return}done=true;cleanup();$('tFire').disabled=true;$('tFlight').textContent=step===5?'6 → ✦ ← 7':'6 ↑';$('tFlight').className=step===5?'t-collision':'t-flying';audio.play(step===5?'counter':'fire');later(()=>{grid[12][4]=step===2?{n:6}:null;$('tMeter').textContent='공격 스택 1/12';success(step===2?'상대에게 공격을 보냈어요! 스택은 1칸 줄었어요.':'맞발사 성공! 내 스택 1칸과 상대 공격 1개가 사라졌어요.',step===2?'fire':'counter')},600)};
+function exit(){cleanup();active=false;$('tutorial').hidden=true;try{localStorage.setItem(key,'seen')}catch{}$('welcomeStart').focus()}
+function open(){active=true;step=0;part=0;$('tutorial').hidden=false;setup();$('tSkip').focus()}
+$('tSkip').onclick=exit;$('tNext').onclick=()=>{if(!done)return;if((step===4||step===6)&&part===0){part=1;setup();return}part=0;if(step===7)exit();else{step++;setup()}};$('tPrev').onclick=()=>{if(part){part=0}else{step=Math.max(0,step-1);part=[4,6].includes(step)?1:0}setup()};$('tutorialReplay').onclick=open;
+let seen=false;try{seen=localStorage.getItem(key)==='seen'}catch{}if(!seen)open();
